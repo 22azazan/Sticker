@@ -13,27 +13,47 @@ class MyApp(QWidget):
         self.initUI()
 
     def initUI(self):
+        
+        old_w = 600
+        old_h = self.height()
 
-        pixmap = QPixmap(img_list[0])
+        self.pixmap = QPixmap(img_list[1])
+        img_w=self.pixmap.width()
+        img_h=self.pixmap.height()
+        
 
-        img_label = QLabel()
-        img_label.setPixmap(pixmap)
+        print("w: {0} \n img_w: {1}, img_h: {2}".format(old_w, img_w, img_h))
+
+        resized = self.pixmap.scaled(old_w, int(old_w/img_w*img_h))
+
+        n_w=self.pixmap.width()
+        n_h=self.pixmap.height()
+        print("n_w: {0}, n_h: {1}".format(n_w, n_h))
+        self.img_label = QLabel()
+        self.img_label.setPixmap(resized)
 
         hbox = QHBoxLayout()
-        hbox.addWidget(img_label)
+        hbox.addWidget(self.img_label)
         self.setLayout(hbox)
 
         self.setWindowTitle('My First Application')
 
         """ flag=QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setWindowFlags(flag) """
-
+        self.setWindowFlags(flag)
+ """
         self.move(300, 300)
-        self.resize(400, 200)
+
         self.show()
 
     def resizeEvent(self, event): #창 사이즈 구하기
-        print(self.size())
+        print(event)
+        print("size : {}".format(self.size()))
+        width = self.width()
+        height = self.height()
+        print(width)
+        """ img_w=self.pixmap.width()
+        resized = self.pixmap.scaled(width, int(width/img_w*height))
+        self.img_label.setPixmap(resized) """
 
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
@@ -43,7 +63,7 @@ for (root, directories, files) in os.walk(img_path):
     for file in files:
         if ".png" in file or ".jpg" in file or ".gif" in file:
             file_path = os.path.join(root, file)
-            img_list.append(file_path)
+            img_list.append(file_path.replace("\\", "/"))
             
 print(img_list)
 
