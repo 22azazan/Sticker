@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtCore import * 
-from pynput import mouse
+from PyQt5.QtGui import QPixmap
 import sys, time
 import cv2
 import os
@@ -13,6 +13,16 @@ class MyApp(QWidget):
         self.initUI()
 
     def initUI(self):
+
+        pixmap = QPixmap(img_list[0])
+
+        img_label = QLabel()
+        img_label.setPixmap(pixmap)
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(img_label)
+        self.setLayout(hbox)
+
         self.setWindowTitle('My First Application')
 
         """ flag=QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
@@ -36,6 +46,8 @@ for (root, directories, files) in os.walk(img_path):
             img_list.append(file_path)
             
 print(img_list)
+
+#파일은 불러왔고, 이제 이걸 띄워보자.
 
 if __name__ == '__main__':
    app = QApplication(sys.argv)
