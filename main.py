@@ -12,12 +12,16 @@ class MyApp(QWidget):
 
     def initUI(self):
         self.setWindowTitle('My First Application')
+
         """ flag=QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(flag) """
+
         self.move(300, 300)
         self.resize(400, 200)
         self.show()
 
+img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
+print(img_path)
 
 if __name__ == '__main__':
    app = QApplication(sys.argv)
