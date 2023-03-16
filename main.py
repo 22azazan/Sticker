@@ -31,13 +31,22 @@ class MyApp(QWidget):
 
         self.setWindowTitle('My First Application')
 
-        flag=QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
+        flag=QtCore.Qt.WindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(flag)
 
         self.move(300, 300)
 
         self.show()
 
+    def mousePressEvent(self, event): # 마우스 클릭 이벤트
+        if event.button() == QtCore.Qt.LeftButton: # 왼쪽 버튼이면
+            self.dragPosition = event.globalPos() - self.frameGeometry().topLeft() # 드래그 위치 저장
+            event.accept()
+
+    def mouseMoveEvent(self, event): # 마우스 이동 이벤트
+        if event.buttons() == QtCore.Qt.LeftButton: # 왼쪽 버튼이 눌려있으면
+            self.move(event.globalPos() - self.dragPosition) # 드래그 위치만큼 창 이동
+            event.accept()
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
 
@@ -48,9 +57,7 @@ for (root, directories, files) in os.walk(img_path):
             file_path = os.path.join(root, file)
             img_list.append(file_path.replace("\\", "/"))
             
-print(img_list)
 
-#파일은 불러왔고, 이제 이걸 띄워보자.
 
 if __name__ == '__main__':
    app = QApplication(sys.argv)
