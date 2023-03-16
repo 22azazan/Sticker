@@ -31,32 +31,12 @@ class MyApp(QWidget):
 
         self.setWindowTitle('My First Application')
 
-        """ flag=QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
+        flag=QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(flag)
- """
+
         self.move(300, 300)
 
         self.show()
-
-    def resizeEvent(self, event):
-        if self.old_size != self.size() and (self.old_size.width() < self.width()):            
-            self.img = Image.open(img_list[1])
-            
-            self.img = self.resizing(self.img, True)
-
-            # 픽맵 업데이트
-            qimage = QImage(self.img.tobytes(), self.img.size[0], self.img.size[1], QImage.Format_RGB888)
-            self.pixmap = QPixmap(qimage)
-            self.img_label.setPixmap(self.pixmap)
-
-    def resizing(self, img: Image, dx) -> Image:
-        if dx: #dx가 참일 때 창 크기가 늘어남.
-            x, y = img.size
-            rate = y/x
-            x+=1
-            y=int(x*rate)
-            re_img=img.resize((x, y), Image.Resampling.LANCZOS)
-            return re_img
 
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
