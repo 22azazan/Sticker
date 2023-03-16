@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtCore import * 
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QImage
 import sys, time
-import cv2
+from PIL import Image
 import os
 
 class MyApp(QWidget):
@@ -13,24 +13,17 @@ class MyApp(QWidget):
         self.initUI()
 
     def initUI(self):
-        
-        old_w = 600
-        old_h = self.height()
+        self.old_size = self.size()
 
         self.pixmap = QPixmap(img_list[1])
         img_w=self.pixmap.width()
         img_h=self.pixmap.height()
-        
-
-        print("w: {0} \n img_w: {1}, img_h: {2}".format(old_w, img_w, img_h))
-
-        resized = self.pixmap.scaled(old_w, int(old_w/img_w*img_h))
 
         n_w=self.pixmap.width()
         n_h=self.pixmap.height()
         print("n_w: {0}, n_h: {1}".format(n_w, n_h))
         self.img_label = QLabel()
-        self.img_label.setPixmap(resized)
+        self.img_label.setPixmap(self.pixmap)
 
         hbox = QHBoxLayout()
         hbox.addWidget(self.img_label)
@@ -45,15 +38,25 @@ class MyApp(QWidget):
 
         self.show()
 
-    def resizeEvent(self, event): #창 사이즈 구하기
-        print(event)
-        print("size : {}".format(self.size()))
-        width = self.width()
-        height = self.height()
-        print(width)
-        """ img_w=self.pixmap.width()
-        resized = self.pixmap.scaled(width, int(width/img_w*height))
-        self.img_label.setPixmap(resized) """
+    def resizeEvent(self, event):
+        if self.old_size != self.size() and (self.old_size.width() < self.width()):            
+            self.img = Image.open(img_list[1])
+            
+            self.img = self.resizing(self.img, True)
+
+            # 픽맵 업데이트
+            qimage = QImage(self.img.tobytes(), self.img.size[0], self.img.size[1], QImage.Format_RGB888)
+            self.pixmap = QPixmap(qimage)
+            self.img_label.setPixmap(self.pixmap)
+
+    def resizing(self, img: Image, dx) -> Image:
+        if dx: #dx가 참일 때 창 크기가 늘어남.
+            x, y = img.size
+            rate = y/x
+            x+=1
+            y=int(x*rate)
+            re_img=img.resize((x, y), Image.Resampling.LANCZOS)
+            return re_img
 
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
