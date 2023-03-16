@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtCore import * 
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QFont
 import sys, time
 from PIL import Image
 import os
@@ -29,13 +29,19 @@ class MyApp(QWidget):
         hbox.addWidget(self.img_label)
         self.setLayout(hbox)
 
+        self.xBtn = QPushButton("x", self)
+        self.xBtn.setFont(QFont('Arial', 20))
+        self.xBtn.setStyleSheet("background-color: transparent; color: black, text")
+        self.xBtn.move(img_w-50, 10)
+        self.xBtn.clicked.connect(QCoreApplication.instance().quit)
+
         self.setWindowTitle('My First Application')
 
         flag=QtCore.Qt.WindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(flag)
 
         self.move(300, 300)
-
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.show()
 
     def mousePressEvent(self, event): # 마우스 클릭 이벤트
@@ -47,6 +53,7 @@ class MyApp(QWidget):
         if event.buttons() == QtCore.Qt.LeftButton: # 왼쪽 버튼이 눌려있으면
             self.move(event.globalPos() - self.dragPosition) # 드래그 위치만큼 창 이동
             event.accept()
+
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
 
