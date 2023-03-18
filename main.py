@@ -19,15 +19,15 @@ class MyApp(QWidget):
 
         try: self.pixmap = QPixmap(self.img)
         except: sys.exit("NO IMAGE")
-        img_w=self.pixmap.width()
-        img_h=self.pixmap.height()
+
+        img_size = [self.pixmap.width(), self.pixmap.height()]
 
         n_w=self.pixmap.width()
         n_h=self.pixmap.height()
         print("n_w: {0}, n_h: {1}".format(n_w, n_h))
         self.img_label = QLabel()
         self.img_label.setPixmap(self.pixmap)
-
+        self.img_label.setScaledContents(True)
         hbox = QHBoxLayout()
         hbox.addWidget(self.img_label)
         self.setLayout(hbox)
@@ -41,18 +41,19 @@ class MyApp(QWidget):
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.show()
 
-    def mousePressEvent(self, e: QMouseEventTransition): # 마우스 클릭 이벤트
+    def mousePressEvent(self, event): # 마우스 클릭 이벤트
         if event.button() == QtCore.Qt.LeftButton: # 왼쪽 버튼이면
-            self.dragPosition = e.globalPos() - self.frameGeometry().topLeft() # 드래그 위치 저장
+            self.dragPosition = event.globalPos() - self.frameGeometry().topLeft() # 드래그 위치 저장
             event.accept()
 
     def mouseMoveEvent(self, event): # 마우스 이동 이벤트
+        print(event.pos())
+
         if event.buttons() == QtCore.Qt.LeftButton: # 왼쪽 버튼이 눌려있으면
             self.move(event.globalPos() - self.dragPosition) # 드래그 위치만큼 창 이동
             event.accept()
-    def mouseDoubleClickEvent(self, e): #더블클릭하면 종료
-        QtWidgets.qApp.quit()
 
+    
     def wheelEvent(self, e: QWheelEvent): #스크롤 시 사진 바꾸기
         if e.angleDelta().y() > 0: #스크롤 업 -> 이전 사진
             self.img_num -= 1
@@ -74,6 +75,14 @@ class MyApp(QWidget):
                 self.img_num -= 1
                 print("No image")
         else: pass
+
+    def enterEvent(self, e):
+        self.setWindowOpacity(0.5)
+    def leaveEvent(self, e):
+         self.setWindowOpacity(1)
+
+    def mouseDoubleClickEvent(self, e): #더블클릭하면 종료
+        QtWidgets.qApp.quit()
 
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
