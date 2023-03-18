@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtCore import * 
-from PyQt5.QtGui import QPixmap, QImage, QFont
+from PyQt5.QtGui import QPixmap, QImage, QFont, QWheelEvent
 import sys, time
 from PIL import Image
 import os
@@ -14,7 +14,10 @@ class MyApp(QWidget):
 
     def initUI(self):
         self.old_size = self.size()
-        try: self.pixmap = QPixmap(img_list[8])
+        self.img_num = 0
+        self.img = img_list[0]
+
+        try: self.pixmap = QPixmap(self.img)
         except: sys.exit("NO IMAGE")
         img_w=self.pixmap.width()
         img_h=self.pixmap.height()
@@ -38,17 +41,40 @@ class MyApp(QWidget):
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.show()
 
-    def mousePressEvent(self, event): # 마우스 클릭 이벤트
+    def mousePressEvent(self, e: QMouseEventTransition): # 마우스 클릭 이벤트
         if event.button() == QtCore.Qt.LeftButton: # 왼쪽 버튼이면
-            self.dragPosition = event.globalPos() - self.frameGeometry().topLeft() # 드래그 위치 저장
+            self.dragPosition = e.globalPos() - self.frameGeometry().topLeft() # 드래그 위치 저장
             event.accept()
 
     def mouseMoveEvent(self, event): # 마우스 이동 이벤트
         if event.buttons() == QtCore.Qt.LeftButton: # 왼쪽 버튼이 눌려있으면
             self.move(event.globalPos() - self.dragPosition) # 드래그 위치만큼 창 이동
             event.accept()
-    def mouseDoubleClickEvent(self, e) -> None:
+    def mouseDoubleClickEvent(self, e): #더블클릭하면 종료
         QtWidgets.qApp.quit()
+
+    def wheelEvent(self, e: QWheelEvent): #스크롤 시 사진 바꾸기
+        if e.angleDelta().y() > 0: #스크롤 업 -> 이전 사진
+            self.img_num -= 1
+            self.img = img_list[self.img_num]
+            try: 
+                self.pixmap = QPixmap(self.img)
+                self.img_label.setPixmap(self.pixmap)
+                print(self.img_num)
+            except: 
+                self.img_num += 1
+
+        elif e.angleDelta().y() < 0: #스크롤 다운 -> 다음 사진
+            self.img_num += 1
+            self.img = img_list[self.img_num]
+            try: 
+                self.pixmap = QPixmap(self.img)
+                self.img_label.setPixmap(self.pixmap)
+            except: 
+                self.img_num -= 1
+                print("No image")
+        else: pass
+
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
 
