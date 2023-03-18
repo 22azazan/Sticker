@@ -14,8 +14,8 @@ class MyApp(QWidget):
 
     def initUI(self):
         self.old_size = self.size()
-
-        self.pixmap = QPixmap(img_list[1])
+        try: self.pixmap = QPixmap(img_list[8])
+        except: sys.exit("NO IMAGE")
         img_w=self.pixmap.width()
         img_h=self.pixmap.height()
 
@@ -28,12 +28,6 @@ class MyApp(QWidget):
         hbox = QHBoxLayout()
         hbox.addWidget(self.img_label)
         self.setLayout(hbox)
-
-        self.xBtn = QPushButton("x", self)
-        self.xBtn.setFont(QFont('Arial', 20))
-        self.xBtn.setStyleSheet("background-color: transparent; color: black, text")
-        self.xBtn.move(img_w-50, 10)
-        self.xBtn.clicked.connect(QCoreApplication.instance().quit)
 
         self.setWindowTitle('My First Application')
 
@@ -53,7 +47,8 @@ class MyApp(QWidget):
         if event.buttons() == QtCore.Qt.LeftButton: # 왼쪽 버튼이 눌려있으면
             self.move(event.globalPos() - self.dragPosition) # 드래그 위치만큼 창 이동
             event.accept()
-
+    def mouseDoubleClickEvent(self, e) -> None:
+        QtWidgets.qApp.quit()
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
 
@@ -62,8 +57,9 @@ for (root, directories, files) in os.walk(img_path):
     for file in files:
         if ".png" in file or ".jpg" in file or ".gif" in file:
             file_path = os.path.join(root, file)
-            img_list.append(file_path.replace("\\", "/"))
             
+            img_list.append(file_path.replace("\\", "/"))
+            print("["+ str(len(img_list)-1) + "]" + file_path)
 
 
 if __name__ == '__main__':
