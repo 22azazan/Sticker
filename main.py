@@ -12,6 +12,7 @@ class MyApp(QWidget):
         self.initUI()
 
     def initUI(self):
+        self.opacity = 1
         self.img_num = 0
 
         self.old_size = self.size()
@@ -52,6 +53,8 @@ class MyApp(QWidget):
         if event.button() == QtCore.Qt.LeftButton: # 왼쪽 버튼이면
             self.dragPosition = event.globalPos() - self.frameGeometry().topLeft() # 드래그 위치 저장
             event.accept()
+        elif event.button() == QtCore.Qt.RightButton:
+            print("S")
 
     def mouseMoveEvent(self, event): # 마우스 이동 이벤트
         if event.buttons() == QtCore.Qt.LeftButton: # 왼쪽 버튼이 눌려있으면
@@ -59,23 +62,33 @@ class MyApp(QWidget):
             event.accept()
 
     def wheelEvent(self, e: QWheelEvent): #스크롤 시 사진 바꾸기
+        if e.buttons() == QtCore.Qt.RightButton:
+            degree = e.angleDelta().y()/1200
+            print(degree)
+            if self.opacity+degree > 0.1 and self.opacity+degree <= 1:
+                self.opacity += degree
+                self.setWindowOpacity(self.opacity)
+            print(round(self.opacity, 1))
+
+        else:
+            if e.angleDelta().y() > 0: self.img_num -= 1 #스크롤 업 -> 이전 사진
+            elif e.angleDelta().y() < 0: 
+                self.img_num += 1 #스크롤 다운 -> 다음 사진 
+                if self.img_num > len(img_list)-1 : self.img_num = 0         
+            else: pass
+
+            try:
+                self.img = img_list[self.img_num]
+                self.pixmap = QPixmap(self.img)
+            except: 
+                self.img_num -= 1
+                print("No image")
+
+            print(self.img_num)
+            print("\n")
+            self.update()
         
-        if e.angleDelta().y() > 0: self.img_num -= 1 #스크롤 업 -> 이전 사진
-        elif e.angleDelta().y() < 0: 
-            self.img_num += 1 #스크롤 다운 -> 다음 사진 
-            if self.img_num > len(img_list)-1 : self.img_num = 0         
-        else: pass
 
-        try:
-            self.img = img_list[self.img_num]
-            self.pixmap = QPixmap(self.img)
-        except: 
-            self.img_num -= 1
-            print("No image")
-
-        print(self.img_num)
-        print("\n")
-        self.update()
 
     def mouseDoubleClickEvent(self, e): #더블클릭하면 종료
         QtWidgets.qApp.quit()
