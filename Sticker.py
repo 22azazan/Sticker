@@ -16,7 +16,7 @@ class Pixmap(QPixmap):
         transform.scale(-1, 1)
         return Pixmap(self.transformed(transform))
 
-class MyApp(QWidget):
+class Sticker(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -118,6 +118,7 @@ class MyApp(QWidget):
 
 
         else:#--------------------------#스크롤 시 사진 바꾸기
+            self.fliped = False
             if e.angleDelta().y() > 0: self.img_num -= 1#--------------------------#-스크롤 업 -> 이전 사진
             elif e.angleDelta().y() < 0:#--------------------------#-스크롤 다운 -> 다음 사진 
                 self.img_num += 1                           
@@ -145,7 +146,7 @@ class MyApp(QWidget):
 
 img_list = []    
 img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
-
+img_path.strip("\n")
 
  #사진 파일 읽어오기
 for file in os.listdir(img_path):          
@@ -158,5 +159,5 @@ for file in os.listdir(img_path):
 
 if __name__ == '__main__':
    app = QApplication(sys.argv)
-   ex = MyApp()
+   ex = Sticker()
    sys.exit(app.exec_())
