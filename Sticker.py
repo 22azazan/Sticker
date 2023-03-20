@@ -6,7 +6,7 @@ import os, sys, time
 
 
 class Pixmap(QPixmap):
-    def scaling(self, w, h):
+    def scaling(self, w):
         self.ratio = w / self.width()
         new_size = self.size() * self.ratio
         return Pixmap(self.scaled(QSize(new_size.width(), new_size.height()), transformMode = Qt.SmoothTransformation))
@@ -29,7 +29,7 @@ class Sticker(QWidget):
         self.img = img_list[0]
         
         self.fliped = False
-
+        self.old_w = self.width()
         try: 
             self.pixmap = Pixmap(self.img)
         except: sys.exit("NO IMAGE")
@@ -53,6 +53,28 @@ class Sticker(QWidget):
         painter = QPainter(self)
         painter.drawPixmap(int((self.width() - self.pixmap.width()) / 2), int((self.height() - self.pixmap.height()) / 2), self.pixmap)
         self.resize(self.pixmap.width(), self.pixmap.height())
+
+    def updateWin(self):
+        if ".gif" in self.img:
+            self.movie = QMovie(self.img)
+            self.movie.frameChanged.connect(self.animationing)
+            self.movie.start() 
+
+        self.update()
+
+    def animationing(self):
+        self.pixmap = Pixmap(self.movie.currentPixmap())
+        if self.fliped:
+            self.pixmap = self.pixmap.flip()
+        self.pixmap = self.pixmap.scaling(self.old_w)
+        self.update()
+
+    def initPixmap(self):
+        self.pixmap = self.pixmap.scaling(self.old_w)
+        if self.fliped:
+            self.fliped = False
+        else: 
+            self.fliped = True
 #------------------------------------------------------------------------#
 #------------------------------------------------------------------------#
 
@@ -102,23 +124,16 @@ class Sticker(QWidget):
             dsize = e.angleDelta().y()/12
             self.w += dsize
             self.h *= self.w/(self.w - dsize)
-            self.pixmap = self.pixmap.scaling(self.w, self.h)
-
-            self.update()
-
-
-
-        elif e.modifiers() == Qt.AltModifier:
-            if e.angleDelta().y()>0:#--------------------------#alt + 스크롤 업 -> 시계방향 회전
-                degree=e.angleDelta().y()/120
-                
-            else:#--------------------------#alt + 스크롤 다운 -> 반시계방향 회전
-                pass
-
+            self.pixmap = self.pixmap.scaling(self.w)
+            self.old_w = self.pixmap.width()
 
 
         else:#--------------------------#스크롤 시 사진 바꾸기
             self.fliped = False
+            if ".gif" in self.img: 
+                self.movie.stop()
+                self.movie = None
+
             if e.angleDelta().y() > 0: self.img_num -= 1#--------------------------#-스크롤 업 -> 이전 사진
             elif e.angleDelta().y() < 0:#--------------------------#-스크롤 다운 -> 다음 사진 
                 self.img_num += 1                           
@@ -128,16 +143,15 @@ class Sticker(QWidget):
 
             try:
                 self.img = img_list[self.img_num]
-                old_w = self.pixmap.width()
-                old_h = self.pixmap.height()
+                self.old_w = self.pixmap.width()
                 self.pixmap = Pixmap(self.img)
-                self.pixmap = self.pixmap.scaling(old_w, old_h)#--------------------------#이전 사진에 맞추어 크기 변경
+                self.pixmap = self.pixmap.scaling(self.old_w)#--------------------------#이전 사진에 맞추어 크기 변경
 
             except: 
                 self.img_num -= 1
                 print("No image")
 
-            self.update()
+        self.updateWin()
         
 
     def mouseDoubleClickEvent(self, e): #더블클릭하면 종료
