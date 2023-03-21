@@ -37,7 +37,7 @@ class Sticker(QWidget):
         self.w = self.pixmap.width()
         self.h = self.pixmap.height()
         
-
+        self.updateWin()
         flag=QtCore.Qt.WindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(flag)
 
@@ -68,13 +68,6 @@ class Sticker(QWidget):
             self.pixmap = self.pixmap.flip()
         self.pixmap = self.pixmap.scaling(self.old_w)
         self.update()
-
-    def initPixmap(self):
-        self.pixmap = self.pixmap.scaling(self.old_w)
-        if self.fliped:
-            self.fliped = False
-        else: 
-            self.fliped = True
 #------------------------------------------------------------------------#
 #------------------------------------------------------------------------#
 
@@ -91,7 +84,7 @@ class Sticker(QWidget):
 
                 self.update()
                 if self.fliped:
-                    self.fliped = False
+                    self.fliped = False 
                 else: self.fliped = True
                 time.sleep(0.2)
                 
@@ -134,7 +127,10 @@ class Sticker(QWidget):
                 self.movie.stop()
                 self.movie = None
 
-            if e.angleDelta().y() > 0: self.img_num -= 1#--------------------------#-스크롤 업 -> 이전 사진
+            if e.angleDelta().y() > 0:
+                if self.img_num < -len(img_list)+1:
+                    self.img_num = 0
+                self.img_num -= 1#--------------------------#-스크롤 업 -> 이전 사진
             elif e.angleDelta().y() < 0:#--------------------------#-스크롤 다운 -> 다음 사진 
                 self.img_num += 1                           
 
@@ -159,16 +155,20 @@ class Sticker(QWidget):
 
 
 img_list = []    
-img_path = open("image_path.txt", "r", encoding="Utf-8").readline()
-img_path.strip("\n")
+img_path_list = open("image_path.txt", "r", encoding="Utf-8").readlines()
 
  #사진 파일 읽어오기
-for file in os.listdir(img_path):          
-    if ".png" in file or ".jpg" in file or ".gif" in file:
-        file_path = os.path.join(img_path, file)
-        
-        img_list.append(file_path.replace("\\", "/"))
-        print("["+ str(len(img_list)-1) + "]" + file_path)
+for img_path in img_path_list:
+    try:
+        img_path = img_path.strip("\n")
+        for file in os.listdir(img_path):          
+            if ".png" in file or ".jpg" in file or ".gif" in file:
+                file_path = os.path.join(img_path, file)
+                
+                img_list.append(file_path.replace("\\", "/"))
+                print("["+ str(len(img_list)-1) + "]" + file_path)
+    except: 
+        print(f"error path: {img_path}")
 
 
 if __name__ == '__main__':
