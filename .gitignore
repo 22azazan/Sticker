@@ -2,3 +2,4 @@ image_path.txt
 *.jpg
 test.py
 output
+*.ico
