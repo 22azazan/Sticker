@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import *
 import os, sys, time
-
+import threading
 
 class Pixmap(QPixmap):
     def scaling(self, w):
@@ -26,17 +26,13 @@ class Sticker(QWidget):
         self.opacity = 1
 
         self.img_num = 0
-        try:
-            self.img = img_list[0]
-        except:
-            sys.exit("NO IMAGE")
-
-
         self.fliped = False
         self.old_w = self.width()
-        try: 
+        try:
+            self.img = img_list[0]     
             self.pixmap = Pixmap(self.img)
-        except: sys.exit("NO IMAGE")
+        except:
+            sys.exit("NO IMAGE")
 
         self.w = self.pixmap.width()
         self.h = self.pixmap.height()
@@ -59,7 +55,7 @@ class Sticker(QWidget):
         self.resize(self.pixmap.width(), self.pixmap.height())
 
     def updateWin(self):
-        if ".gif" in self.img:
+        if ".gif" in (self.img).lower():
             self.movie = QMovie(self.img)
             self.movie.frameChanged.connect(self.animationing)
             self.movie.start() 
@@ -157,23 +153,31 @@ class Sticker(QWidget):
     def mouseDoubleClickEvent(self, e): #더블클릭하면 종료
         if e.buttons() == QtCore.Qt.LeftButton: QtWidgets.qApp.quit()
 
+img_list = []
 
-img_list = []    
-img_path_list = open("image_path.txt", "r", encoding="Utf-8").readlines()
+def getImages():
+    while True:
+        img_list.clear() 
+        img_path_list = open("image_path.txt", "r", encoding="Utf-8").readlines()
 
- #사진 파일 읽어오기
-for img_path in img_path_list:
-    try:
-        img_path = img_path.strip("\n")
-        for file in os.listdir(img_path):          
-            if ".png" in file or ".jpg" in file or ".gif" in file:
-                file_path = os.path.join(img_path, file)
-                
-                img_list.append(file_path.replace("\\", "/"))
-                print("["+ str(len(img_list)-1) + "]" + file_path)
-    except: 
-        print(f"error path: {img_path}")
+        #사진 파일 읽어오기
+        for img_path in img_path_list:
+            try:
+                img_path = img_path.strip("\n")
+                for file in os.listdir(img_path):          
+                    if ".png" in file.lower() or ".jpg" in file.lower() or ".gif" in file.lower():
+                        file_path = os.path.join(img_path, file)
+                        
+                        img_list.append(file_path.replace("\\", "/"))
+                        print("["+ str(len(img_list)-1) + "]" + file_path)
+            except: 
+                print(f"error path: {img_path}")
+                break
+        time.sleep(0.2)
 
+get_images = threading.Thread(target=getImages)
+get_images.daemon = True
+get_images.start()
 
 if __name__ == '__main__':
    app = QApplication(sys.argv)
