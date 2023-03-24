@@ -26,8 +26,12 @@ class Sticker(QWidget):
         self.opacity = 1
 
         self.img_num = 0
-        self.img = img_list[0]
-        
+        try:
+            self.img = img_list[0]
+        except:
+            sys.exit("NO IMAGE")
+
+
         self.fliped = False
         self.old_w = self.width()
         try: 
