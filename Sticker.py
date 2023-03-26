@@ -127,22 +127,19 @@ class Sticker(QWidget):
                 self.movie.stop()
                 self.movie = None
 
-            if e.angleDelta().y() > 0:
-                if self.img_num < -len(img_list)+1:
-                    self.img_num = 0
-                self.img_num -= 1#--------------------------#-스크롤 업 -> 이전 사진
-            elif e.angleDelta().y() < 0:#--------------------------#-스크롤 다운 -> 다음 사진 
-                self.img_num += 1                           
+            self.img_num += int(e.angleDelta().y()/120)                           
 
-                if self.img_num > len(img_list)-1 : self.img_num = 0#--------------------------#-img_list index가 초과하면 0으로 초기화      
-            else: pass
-
+            if self.img_num > len(img_list)-1 or  self.img_num < -len(img_list)+1:#--------------------------#-img_list index가 초과하면 0으로 초기화
+                    self.img_num = 0     
+            
             try:
                 self.img = img_list[self.img_num]
                 self.old_w = self.pixmap.width()
                 self.pixmap = Pixmap(self.img)
                 self.pixmap = self.pixmap.scaling(self.old_w)#--------------------------#이전 사진에 맞추어 크기 변경
-
+                if (self.geometry().y() <= -self.pixmap.height()) and self.geometry().y() < 0:#--------------------------#
+                    self.move(self.geometry().x(), 0)
+                
             except: 
                 self.img_num -= 1
                 print("No image")
@@ -169,7 +166,6 @@ def getImages():
                         file_path = os.path.join(img_path, file)
                         
                         img_list.append(file_path.replace("\\", "/"))
-                        print("["+ str(len(img_list)-1) + "]" + file_path)
             except: 
                 print(f"error path: {img_path}")
                 break
