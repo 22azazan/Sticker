@@ -28,6 +28,7 @@ class Sticker(QWidget):
         self.img_num = 0
         self.fliped = False
         self.old_w = self.width()
+        
         try:
             self.img = img_list[0]     
             self.pixmap = Pixmap(self.img)
@@ -79,17 +80,12 @@ class Sticker(QWidget):
 
 
         elif e.buttons() == QtCore.Qt.MidButton:#--------------------------# 휠 버튼 클릭 시 -> 좌우 반전
-            try:
-                self.pixmap = self.pixmap.flip()
-
-                self.update()
-                if self.fliped:
-                    self.fliped = False 
-                else: self.fliped = True
-                time.sleep(0.2)
-                
-            except:
-                print("카시코미 카시코미 츠츠신데 오카에시모-오스!!")
+            self.pixmap = self.pixmap.flip()
+            self.update()
+            if self.fliped:
+                self.fliped = False 
+            else: self.fliped = True
+            time.sleep(0.2)#--------------------------# 더블클릭으로 인한 강종 방지
 
 
     def mouseMoveEvent(self, event):#--------------------------# 마우스 이동 이벤트
@@ -102,7 +98,7 @@ class Sticker(QWidget):
 
         if e.buttons() == QtCore.Qt.RightButton:#--------------------------#우클릭 한 채로 스크롤 시 투명도 조절
             degree = e.angleDelta().y()/1200
-            if self.opacity+degree > 0.1 and self.opacity+degree <= 1:#--------------------------#0.1 < self.opacity + degree <= 1
+            if self.opacity+degree > 0.1 and self.opacity+degree <= 1:#--------------------------#0.1 < self.opacity + degree <= 1 : 투명도 조절
                 self.opacity += degree
                 self.setWindowOpacity(self.opacity)
 
@@ -130,14 +126,14 @@ class Sticker(QWidget):
             self.img_num += int(e.angleDelta().y()/120)                           
 
             if self.img_num > len(img_list)-1 or  self.img_num < -len(img_list)+1:#--------------------------#-img_list index가 초과하면 0으로 초기화
-                    self.img_num = 0     
+                    self.img_num = 0    
             
             try:
                 self.img = img_list[self.img_num]
                 self.old_w = self.pixmap.width()
                 self.pixmap = Pixmap(self.img)
                 self.pixmap = self.pixmap.scaling(self.old_w)#--------------------------#이전 사진에 맞추어 크기 변경
-                if (self.geometry().y() <= -self.pixmap.height()) and self.geometry().y() < 0:#--------------------------#
+                if self.geometry().y() <= -self.pixmap.height():#--------------------------# 창의 y 위치값이 pixmap의 높이의 마이너스를 곱한 것보다 작으면 (창이 모니터 밖으로 나가있다면) : y 좌표를 0으로 수정
                     self.move(self.geometry().x(), 0)
                 
             except: 
@@ -169,9 +165,9 @@ def getImages():
             except: 
                 print(f"error path: {img_path}")
                 break
-        time.sleep(0.2)
+        time.sleep(0.5)
 
-get_images = threading.Thread(target=getImages)
+get_images = threading.Thread(target=getImages)#--------------------------#쓰레드를 통해 폴더가 바뀐 경우 계속 img_list를 업데이트 해준다.
 get_images.daemon = True
 get_images.start()
 
